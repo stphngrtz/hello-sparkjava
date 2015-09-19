@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <title>Posts - Sparkjava Tutorials</title>
+</head>
+<body>
+    <h1>The marvellous blog of mine</h1>
+
+    <#list posts as post>
+    <div>
+        <h2>${post.title}</h2>
+        <p>${post.content}</p>
+        <i>Published on the ${post.publishingDate}</i>
+    </div>
+    </#list>
+</body>
+</html>
