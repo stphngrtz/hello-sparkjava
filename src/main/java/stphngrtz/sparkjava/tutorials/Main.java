@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.post;
 
 public class Main {
 
@@ -30,6 +31,11 @@ public class Main {
     private static final int OK = 200;
     private static final String APPLICATION_JSON = "application/json";
     private static final String TEXT_HTML = "text/html";
+
+    // curl http://localhost:4567/posts
+    // curl http://localhost:4567/posts -X POST -d '{"title":"yet another post","content":"this is the content of yet another post"}'
+    // curl http://localhost:4567/posts/617b69de-67f9-43ba-9cb7-c2c0caf8e102/comments
+    // curl http://localhost:4567/posts/617b69de-67f9-43ba-9cb7-c2c0caf8e102/comments -X POST -d '{"author":"stephan","content":"my first comment"}'
 
     public static void main(String[] args) {
         // port(4568);

@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
