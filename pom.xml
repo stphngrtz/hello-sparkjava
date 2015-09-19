@@ -11,6 +11,8 @@
     <properties>
         <sparkjava.version>2.3</sparkjava.version>
         <jackson.version>2.6.2</jackson.version>
+        <sql2o.version>1.5.4</sql2o.version>
+        <h2.version>1.4.189</h2.version>
     </properties>
 
     <dependencies>
@@ -33,6 +35,16 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sql2o</groupId>
+            <artifactId>sql2o</artifactId>
+            <version>${sql2o.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
         </dependency>
     </dependencies>
 
