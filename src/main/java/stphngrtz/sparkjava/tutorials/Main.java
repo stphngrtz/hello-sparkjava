@@ -2,13 +2,20 @@ package stphngrtz.sparkjava.tutorials;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.template.Configuration;
 import org.sql2o.Sql2o;
 import org.sql2o.converters.UUIDConverter;
 import org.sql2o.quirks.NoQuirks;
+import spark.ModelAndView;
+import spark.Request;
+import spark.template.freemarker.FreeMarkerEngine;
 import stphngrtz.sparkjava.tutorials.model.Model;
 import stphngrtz.sparkjava.tutorials.model.Sql2oModel;
 
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static spark.Spark.*;
@@ -18,9 +25,10 @@ public class Main {
     private static final int BAD_REQUEST = 400;
     private static final int OK = 200;
     private static final String APPLICATION_JSON = "application/json";
+    private static final String TEXT_HTML = "text/html";
 
     public static void main(String[] args) {
-        // port(4568);
+        port(4568);
 
         Sql2o sql2o = new Sql2o("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "username", "password", new NoQuirks() {{
             converters.put(UUID.class, new UUIDConverter());
@@ -31,28 +39,42 @@ public class Main {
         ObjectMapper om = new ObjectMapper();
         om.enable(SerializationFeature.INDENT_OUTPUT);
 
+        FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+        Configuration configuration = new Configuration();
+        configuration.setTemplateLoader(new ClassTemplateLoader(Main.class, "/"));
+        freeMarkerEngine.setConfiguration(configuration);
+
         get("/hello", (req, res) -> "Hello World!");
 
-        post("/posts", (req, res) -> {
-            res.type(APPLICATION_JSON);
+        post("/posts", (request, response) -> {
+            response.type(APPLICATION_JSON);
 
-            NewPostPayload npp = om.readValue(req.body(), NewPostPayload.class);
+            NewPostPayload npp = om.readValue(request.body(), NewPostPayload.class);
             if (!npp.isValid()) {
-                res.status(BAD_REQUEST);
+                response.status(BAD_REQUEST);
                 return "";
             }
             UUID uuid = model.createPost(npp.getTitle(), npp.getContent());
-            res.status(OK);
+            response.status(OK);
             return uuid;
         });
 
         get("/posts", (request, response) -> {
-            response.type(APPLICATION_JSON);
-            response.status(OK);
+            if (shouldReturnHtml(request)) {
+                response.type(TEXT_HTML);
+                response.status(OK);
 
-            StringWriter sw = new StringWriter();
-            om.writeValue(sw, model.getAllPosts());
-            return sw.toString();
+                Map<String, Object> attributes = new HashMap<>();
+                attributes.put("posts", model.getAllPosts());
+                return freeMarkerEngine.render(new ModelAndView(attributes, "stphngrtz/sparkjava/tutorials/posts.html"));
+            } else {
+                response.type(APPLICATION_JSON);
+                response.status(OK);
+
+                StringWriter sw = new StringWriter();
+                om.writeValue(sw, model.getAllPosts());
+                return sw.toString();
+            }
         });
 
         post("/posts/:uuid/comments", (request, response) -> {
@@ -87,6 +109,11 @@ public class Main {
             om.writeValue(sw, model.getAllCommentsOn(post));
             return sw.toString();
         });
+    }
+
+    private static boolean shouldReturnHtml(Request request) {
+        String accept = request.headers("Accept");
+        return accept != null && accept.contains(TEXT_HTML);
     }
 
     private static class NewPostPayload {
